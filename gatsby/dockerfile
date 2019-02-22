@@ -1,0 +1,10 @@
+from node:alpine
+
+RUN apk add git gcc g++
+RUN node --version
+RUN npm --version
+
+
+WORKDIR /code/wp
+
+CMD npm run develop -- --host=0.0.0.0

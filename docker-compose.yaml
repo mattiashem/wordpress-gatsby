@@ -1,0 +1,55 @@
+version: '3'
+
+services:
+   db:
+     image: mysql:5.7
+     environment:
+       MYSQL_ROOT_PASSWORD: somewordpress
+       MYSQL_DATABASE: wordpress
+       MYSQL_USER: wordpress
+       MYSQL_PASSWORD: wordpress
+     volumes:
+       - ./seed:/seed
+   phpmyadmin:
+     image: phpmyadmin/phpmyadmin
+     environment:
+       PMA_HOST: db
+       PMA_USER: root
+       PMA_PASSWORD: somewordpress
+     ports:
+       - "82:80"
+   gatsby:
+     build: gatsby/.
+     ports:
+       - "8001:8000"
+     volumes:
+       - ./gatsby/code:/code
+     command: tail -f /etc/fstab
+   wordpress5:
+     depends_on:
+       - db
+     image: mattiashem/wp-base:5.0
+     ports:
+       - "8000:8000"
+       - "8444:8443"
+     volumes:
+       - ./wp-content:/repo/wp-content
+     restart: always
+     environment:
+       DBHOST: db
+       SITENAME: wordpress
+       DBPASS: wordpress
+       SMTP_HOST: mailgun.com
+       SMTP_USER: non@test.com
+       SMTP_PASS: password
+       SMTP_FROM: non@test.com
+   dbseed:
+     depends_on:
+       - db
+     image: mattiashem/dbseed
+     volumes:
+       - ./seed:/seed
+     environment:
+       - SQLUSER=wordpress
+       - SQLPASS=wordpress
+       - SQLDB=wordpress
